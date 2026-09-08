@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quiz Master</title>
+<style>
+:root{
+  --bg:#0f1115;
+  --bg-elev:#161922;
+  --bg-elev-2:#1d212c;
+  --border:#2a2f3c;
+  --ink:#eef0f4;
+  --ink-dim:#9aa2b1;
+  --ink-faint:#5c6473;
+  --accent:#e8a33d;
+  --accent-ink:#1a1305;
+  --good:#5fd6a4;
+  --bad:#e8637a;
+  --pending:#e8c93d;
+  --radius:14px;
+  --radius-sm:8px;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,Arial,sans-serif;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+html.light{
+  --bg:#f4f2ec;
+  --bg-elev:#ffffff;
+  --bg-elev-2:#eeece4;
+  --border:#ddd8ca;
+  --ink:#1c1d1f;
+  --ink-dim:#5b5e66;
+  --ink-faint:#8b8e96;
+  --accent:#b8721f;
+  --accent-ink:#fff7ea;
+  --good:#2f9268;
+  --bad:#c53a52;
+  --pending:#a9840c;
+  --shadow:0 10px 30px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);transition:background .25s,color .25s;-webkit-tap-highlight-color:transparent;}
+button,input,textarea,select{font-family:inherit;}
+.wrap{max-width:920px;margin:0 auto;padding:18px 16px 90px;}
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb, var(--bg) 88%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+.topbar-inner{max-width:920px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.brand{font-weight:800;font-size:19px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);}
+.top-actions{display:flex;gap:8px;align-items:center;}
+.icon-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--bg-elev);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.icon-btn:active{transform:scale(.94);}
+.sync-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);border:1px solid var(--border);background:var(--bg-elev);padding:6px 10px;border-radius:999px;cursor:pointer;user-select:none;}
+.sync-dot{width:8px;height:8px;border-radius:50%;}
+.sync-dot.green{background:var(--good);}
+.sync-dot.yellow{background:var(--pending);animation:pulse 1s infinite;}
+.sync-dot.red{background:var(--bad);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;}
+.card-tight{padding:14px 16px;}
+h1{font-size:26px;margin:6px 0 4px;letter-spacing:-.01em;}
+h2{font-size:19px;margin:0 0 12px;}
+h3{font-size:15px;margin:0 0 8px;color:var(--ink-dim);font-weight:600;}
+p.muted{color:var(--ink-dim);font-size:14px;line-height:1.7;margin:4px 0 0;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:13px;color:var(--ink-dim);margin-bottom:6px;}
+input[type=text],input[type=password],input[type=number],textarea,select{
+  width:100%;background:var(--bg-elev-2);border:1px solid var(--border);color:var(--ink);
+  border-radius:var(--radius-sm);padding:13px 14px;font-size:15px;outline:none;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);}
+textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.big-input{font-size:20px;text-align:center;letter-spacing:.05em;font-family:var(--mono);padding:18px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--radius-sm);
+  padding:14px 18px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:transform .08s,opacity .15s;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--accent);color:var(--accent-ink);}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--border);}
+.btn-danger{background:transparent;color:var(--bad);border:1px solid var(--bad);}
+.btn-sm{width:auto;padding:9px 14px;font-size:13px;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+.btn-row .btn{flex:1;min-width:120px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.link-btn{background:none;border:none;color:var(--accent);font-size:14px;cursor:pointer;padding:6px 0;font-weight:600;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:520px){.grid-3{grid-template-columns:1fr 1fr;}}
+.stat-box{background:var(--bg-elev-2);border-radius:var(--radius-sm);padding:14px;text-align:center;}
+.stat-box .n{font-size:24px;font-weight:800;}
+.stat-box .l{font-size:12px;color:var(--ink-dim);margin-top:2px;}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:999px;font-weight:700;}
+.badge.open{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good);}
+.badge.closed{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad);}
+.badge.pending{background:color-mix(in srgb,var(--pending) 20%,transparent);color:var(--pending);}
+.badge.done{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good);}
+.list-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border:1px solid var(--border);
+  border-radius:var(--radius-sm);margin-bottom:10px;background:var(--bg-elev-2);cursor:pointer;}
+.list-item:active{transform:scale(.99);}
+.li-main{flex:1;min-width:0;}
+.li-title{font-weight:700;font-size:15px;}
+.li-sub{font-size:12.5px;color:var(--ink-dim);margin-top:3px;}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px;}
+.tab{flex:none;padding:9px 15px;border-radius:999px;border:1px solid var(--border);background:var(--bg-elev);color:var(--ink-dim);font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
+.progress-track{height:8px;background:var(--bg-elev-2);border-radius:99px;overflow:hidden;margin:14px 0;}
+.progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .3s;}
+.choice{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  margin-bottom:9px;cursor:pointer;background:var(--bg-elev-2);}
+.choice.selected{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--bg-elev-2));}
+.choice .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--ink-faint);flex:none;display:flex;align-items:center;justify-content:center;}
+.choice.selected .dot{border-color:var(--accent);}
+.choice.selected .dot::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--accent);}
+.result-code-box{text-align:center;background:var(--bg-elev-2);border:1.5px dashed var(--accent);border-radius:var(--radius);padding:22px;margin:16px 0;}
+.result-code-box .code{font-family:var(--mono);font-size:28px;font-weight:800;letter-spacing:.08em;color:var(--accent);margin:8px 0;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+@media(min-width:640px){.modal-backdrop{align-items:center;}}
+.modal{background:var(--bg-elev);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:22px;width:100%;max-width:480px;max-height:88vh;overflow:auto;}
+@media(min-width:640px){.modal{border-radius:18px;}}
+.toast-wrap{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 32px);max-width:420px;}
+.toast{background:var(--bg-elev-2);border:1px solid var(--border);color:var(--ink);padding:12px 18px;border-radius:99px;font-size:13.5px;box-shadow:var(--shadow);animation:toastin .2s ease;text-align:center;}
+.toast.err{border-color:var(--bad);color:var(--bad);}
+.toast.ok{border-color:var(--good);color:var(--good);}
+@keyframes toastin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.qcard{border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;background:var(--bg-elev-2);}
+.qcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
+.qtype-tag{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--bg-elev);color:var(--ink-dim);border:1px solid var(--border);}
+.small-note{font-size:12.5px;color:var(--ink-faint);margin-top:8px;line-height:1.6;}
+.empty-state{text-align:center;padding:40px 16px;color:var(--ink-dim);}
+.empty-state .em{font-size:36px;margin-bottom:10px;}
+.divider{height:1px;background:var(--border);margin:18px 0;}
+.chip-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg-elev-2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;}
+.switch{position:relative;width:44px;height:26px;flex:none;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:.2s;}
+.slider::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+input:checked+.slider{background:var(--accent);}
+input:checked+.slider::before{transform:translateX(-18px);}
+html:not([dir=rtl]) input:checked+.slider::before{transform:translateX(18px);}
+.answer-box{border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:var(--bg-elev-2);}
+.answer-box.correct{border-color:var(--good);}
+.answer-box.wrong{border-color:var(--bad);}
+.score-input{width:90px;display:inline-block;}
+.spinner{width:16px;height:16px;border:2px solid var(--ink-faint);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:14px;color:var(--ink-dim);}
+.footer-note{text-align:center;color:var(--ink-faint);font-size:12px;margin-top:20px;}
+.reorder-btns{display:flex;flex-direction:column;gap:2px;}
+.reorder-btns button{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--bg-elev);color:var(--ink);cursor:pointer;font-size:11px;}
+::selection{background:var(--accent);color:var(--accent-ink);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand" onclick="go('home')"><span class="dot"></span><span id="brandName">Quiz Master</span></div>
+    <div class="top-actions">
+      <div class="sync-pill" id="syncPill" onclick="manualSync()">
+        <span class="sync-dot yellow" id="syncDot"></span><span id="syncText">جاري الاتصال</span>
+      </div>
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+</div>
+<div class="wrap" id="app"></div>
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+/* =========================================================
+   1) إعدادات Telegram — عدّل القيم التالية فقط
+   ========================================================= */
+const TELEGRAM_BOT_TOKEN = "8561942317:AAHB-TTjccVeCkgQwCWkFJNDhNxhtCmB1Hs";
+const TELEGRAM_CHAT_ID   = "-1004425506813";
+const ADMIN_PASSWORD     = "Ya_Hm_MM_A#0";
+const PLATFORM_NAME      = "Quiz Master";
+/* ========================================================= */
+
+const DATA_VERSION = 1;
+const CHUNK_SIZE = 3500;
+const TG_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+const LS_CACHE_KEY = 'qm_cache_v1';
+const LS_WIP_PREFIX = 'qm_wip_';
+const LS_THEME = 'qm_theme';
+const LS_CLIENT_ID = 'qm_client_id';
+
+let STATE = {
+  manifest: null,
+  manifestChunkIds: null,
+  rootMsgId: null,
+  online: false,
+  isAdmin: false,
+  route: {name:'home'},
+  lastSync: null,
+  syncing: false,
+  clientId: null,
+};
+
+/* ---------------- utils ---------------- */
+function uid(len=10){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s='';
+  const arr = new Uint32Array(len);
+  (window.crypto||{getRandomValues:a=>a.forEach((_,i)=>a[i]=Math.floor(Math.random()*4294967295))}).getRandomValues(arr);
+  for(let i=0;i<len;i++) s+=chars[arr[i]%chars.length];
+  return s;
+}
+function resultCode(){ return uid(8); }
+function now(){ return new Date().toISOString(); }
+function fmtDate(iso){
+  if(!iso) return '-';
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'});
+  }catch(e){ return iso; }
+}
+function timeAgo(iso){
+  if(!iso) return 'لا يوجد';
+  const diff = (Date.now() - new Date(iso).getTime())/1000;
+  if(diff<60) return 'منذ لحظات';
+  if(diff<3600) return `منذ ${Math.floor(diff/60)} دقيقة`;
+  if(diff<86400) return `منذ ${Math.floor(diff/3600)} ساعة`;
+  return `منذ ${Math.floor(diff/86400)} يوم`;
+}
+function escapeHtml(s){
+  return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function shuffleArr(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function toast(msg, type=''){
+  const wrap = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = 'toast '+(type||'');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 2800);
+}
+
+/* ---------------- theme ---------------- */
+function initTheme(){
+  const saved = localStorage.getItem(LS_THEME) || 'dark';
+  document.documentElement.classList.toggle('light', saved==='light');
+  document.getElementById('themeBtn').textContent = saved==='light' ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem(LS_THEME, isLight?'light':'dark');
+  document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙';
+}
+
+/* ---------------- sync status ui ---------------- */
+function setSyncStatus(status, text){
+  const dot = document.getElementById('syncDot');
+  const t = document.getElementById('syncText');
+  dot.className = 'sync-dot '+status;
+  const labels = {green:'تمت المزامنة', yellow:'جاري المزامنة', red:'فشل الاتصال'};
+  t.textContent = text || labels[status] || '';
+}
+
+/* =========================================================
+   2) طبقة الاتصال بـ Telegram Bot API
+   ========================================================= */
+async function tgCall(method, params, {silent}={}){
+  if(!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes('ضع_')){
+    throw new Error('TOKEN_MISSING');
+  }
+  const res = await fetch(`${TG_API}/${method}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(params)
+  });
+  let data;
+  try{ data = await res.json(); }catch(e){ throw new Error('BAD_RESPONSE'); }
+  if(!data.ok){
+    const desc = data.description || 'خطأ غير معروف من Telegram';
+    throw new Error(desc);
+  }
+  return data.result;
+}
+async function tgSendMessage(text){
+  return tgCall('sendMessage',{chat_id:TELEGRAM_CHAT_ID, text, disable_notification:true});
+}
+async function tgEditMessage(message_id, text){
+  try{
+    return await tgCall('editMessageText',{chat_id:TELEGRAM_CHAT_ID, message_id, text});
+  }catch(e){
+    if(/exactly the same|message is not modified/i.test(e.message)) return {message_id};
+    throw e;
+  }
+}
+async function tgDeleteMessage(message_id){
+  try{ await tgCall('deleteMessage',{chat_id:TELEGRAM_CHAT_ID, message_id}); }catch(e){ /* ignore */ }
+}
+async function tgPinMessage(message_id){
+  try{ await tgCall('pinChatMessage',{chat_id:TELEGRAM_CHAT_ID, message_id, disable_notification:true}); }catch(e){ /* ignore, not fatal */ }
+}
+async function tgGetChat(){
+  return tgCall('getChat',{chat_id:TELEGRAM_CHAT_ID});
+}
+async function tgNotify(text){
+  try{ await tgSendMessage(text); }catch(e){ /* notifications are best-effort */ }
+}
+/* قراءة محتوى رسالة موجودة عبر إعادة توجيهها لنفس القناة ثم حذف النسخة المُعاد توجيهها */
+async function readMessageById(msgId){
+  const fwd = await tgCall('forwardMessage',{chat_id:TELEGRAM_CHAT_ID, from_chat_id:TELEGRAM_CHAT_ID, message_id:msgId, disable_notification:true});
+  const text = fwd.text || '';
+  tgDeleteMessage(fwd.message_id);
+  return text;
+}
+function splitText(text, size){
+  const chunks = [];
+  for(let i=0;i<text.length;i+=size) chunks.push(text.slice(i,i+size));
+  if(chunks.length===0) chunks.push('');
+  return chunks;
+}
+/* كتابة "سجل" قد يمتد على عدة رسائل، مع إعادة استخدام معرفات الرسائل الموجودة */
+async function writeRecord(existingIds, text){
+  const chunks = splitText(text, CHUNK_SIZE);
+  const ids = [];
+  for(let i=0;i<chunks.length;i++){
+    if(existingIds && existingIds[i]){
+      await tgEditMessage(existingIds[i], chunks[i]);
+      ids.push(existingIds[i]);
+    }else{
+      const m = await tgSendMessage(chunks[i]);
+      ids.push(m.message_id);
+    }
+  }
+  if(existingIds){
+    for(let i=chunks.length;i<existingIds.length;i++){
+      tgDeleteMessage(existingIds[i]);
+    }
+  }
+  return ids;
+}
+async function readRecord(ids){
+  if(!ids || !ids.length) return '';
+  let text = '';
+  for(const id of ids){ text += await readMessageById(id); }
+  return text;
+}
+
+/* =========================================================
+   3) طبقة قاعدة البيانات (Manifest على Telegram + Cache محلي)
+   ========================================================= */
+function freshManifest(){
+  return { v: DATA_VERSION, updatedAt: now(), quizzes:{}, results:{}, settingsIds:null };
+}
+function loadLocalCache(){
+  try{
+    const raw = localStorage.getItem(LS_CACHE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function saveLocalCache(){
+  try{
+    localStorage.setItem(LS_CACHE_KEY, JSON.stringify({
+      manifest: STATE.manifest,
+      manifestChunkIds: STATE.manifestChunkIds,
+      rootMsgId: STATE.rootMsgId,
+      savedAt: now()
+    }));
+  }catch(e){ /* storage full - ignore */ }
+}
+function getClientId(){
+  let id = localStorage.getItem(LS_CLIENT_ID);
+  if(!id){ id = uid(8); localStorage.setItem(LS_CLIENT_ID, id); }
+  return id;
+}
+
+async function bootstrap(){
+  STATE.clientId = getClientId();
+  setSyncStatus('yellow','جاري الاتصال');
+  const cached = loadLocalCache();
+  if(cached && cached.manifest){
+    STATE.manifest = cached.manifest;
+    STATE.manifestChunkIds = cached.manifestChunkIds;
+    STATE.rootMsgId = cached.rootMsgId;
+    STATE.lastSync = cached.savedAt;
+    render();
+  }
+  try{
+    const chat = await tgGetChat();
+    if(chat.pinned_message && chat.pinned_message.text){
+      const root = JSON.parse(chat.pinned_message.text);
+      STATE.rootMsgId = chat.pinned_message.message_id;
+      const manifestText = await readRecord(root.manifestIds);
+      const remoteManifest = JSON.parse(manifestText);
+      STATE.manifestChunkIds = root.manifestIds;
+      // إذا كانت نسخة Telegram أحدث من المحلية نعتمدها
+      if(!STATE.manifest || (remoteManifest.updatedAt > STATE.manifest.updatedAt) || !cached){
+        STATE.manifest = remoteManifest;
+      }
+    }else{
+      // أول تشغيل: أنشئ البيانات الأساسية على Telegram
+      const manifest = freshManifest();
+      const ids = await writeRecord(null, JSON.stringify(manifest));
+      const root = {v:DATA_VERSION, manifestIds:ids, updatedAt: now()};
+      const m = await tgSendMessage(JSON.stringify(root));
+      await tgPinMessage(m.message_id);
+      STATE.rootMsgId = m.message_id;
+      STATE.manifestChunkIds = ids;
+      STATE.manifest = manifest;
+    }
+    STATE.online = true;
+    STATE.lastSync = now();
+    saveLocalCache();
+    setSyncStatus('green');
+  }catch(e){
+    STATE.online = false;
+    if(!STATE.manifest) STATE.manifest = freshManifest();
+    if(e.message==='TOKEN_MISSING'){
+      setSyncStatus('red','لم يتم ضبط Telegram بعد');
+    }else{
+      setSyncStatus('red','فشل الاتصال');
+    }
+  }
+  render();
+}
+
+async function manualSync(){
+  if(STATE.syncing) return;
+  STATE.syncing = true;
+  setSyncStatus('yellow');
+  try{
+    const chat = await tgGetChat();
+    if(chat.pinned_message && chat.pinned_message.text){
+      const root = JSON.parse(chat.pinned_message.text);
+      STATE.rootMsgId = chat.pinned_message.message_id;
+      const manifestText = await readRecord(root.manifestIds);
+      STATE.manifest = JSON.parse(manifestText);
+      STATE.manifestChunkIds = root.manifestIds;
+    }
+    STATE.online = true;
+    STATE.lastSync = now();
+    saveLocalCache();
+    setSyncStatus('green');
+    toast('تم تحديث البيانات','ok');
+  }catch(e){
+    STATE.online = false;
+    setSyncStatus('red');
+    toast('تعذّر الاتصال بـ Telegram','err');
+  }
+  STATE.syncing = false;
+  render();
+}
+
+/* حفظ الـ manifest على Telegram مع دمج بسيط لتقليل تعارض الأجهزة المتعددة */
+async function saveManifest(mutatorFn){
+  setSyncStatus('yellow');
+  try{
+    // اقرأ آخر نسخة أولاً لتقليل الكتابة فوق تعديلات جهاز آخر
+    let remote = null;
+    try{
+      const chat = await tgGetChat();
+      if(chat.pinned_message && chat.pinned_message.text){
+        const root = JSON.parse(chat.pinned_message.text);
+        STATE.rootMsgId = chat.pinned_message.message_id;
+        const manifestText = await readRecord(root.manifestIds);
+        remote = JSON.parse(manifestText);
+        STATE.manifestChunkIds = root.manifestIds;
+      }
+    }catch(e){ /* تجاهل، سنستخدم النسخة المحلية */ }
+
+    if(remote){
+      STATE.manifest = mergeManifests(STATE.manifest, remote);
+    }
+    mutatorFn(STATE.manifest);
+    STATE.manifest.updatedAt = now();
+
+    const text = JSON.stringify(STATE.manifest);
+    const newIds = await writeRecord(STATE.manifestChunkIds, text);
+    STATE.manifestChunkIds = newIds;
+    const root = {v:DATA_VERSION, manifestIds:newIds, updatedAt: now()};
+    if(STATE.rootMsgId){
+      await tgEditMessage(STATE.rootMsgId, JSON.stringify(root));
+    }else{
+      const m = await tgSendMessage(JSON.stringify(root));
+      await tgPinMessage(m.message_id);
+      STATE.rootMsgId = m.message_id;
+    }
+    STATE.online = true;
+    STATE.lastSync = now();
+    saveLocalCache();
+    setSyncStatus('green');
+    return true;
+  }catch(e){
+    // فشل الاتصال: طبّق التغيير محليًا فقط وأعلم المستخدم أن هناك بيانات تحتاج مزامنة
+    mutatorFn(STATE.manifest);
+    STATE.manifest.updatedAt = now();
+    saveLocalCache();
+    STATE.online = false;
+    setSyncStatus('red','⚠️ يحتاج مزامنة');
+    toast('تعذّر حفظ التغييرات على Telegram، تم الحفظ محليًا مؤقتًا','err');
+    return false;
+  }
+}
+function mergeManifests(local, remote){
+  if(!local) return remote;
+  if(!remote) return local;
+  const merged = {v:DATA_VERSION, updatedAt: now(), quizzes:{}, results:{}, settingsIds: remote.settingsIds || local.settingsIds};
+  const quizKeys = new Set([...Object.keys(local.quizzes||{}), ...Object.keys(remote.quizzes||{})]);
+  quizKeys.forEach(k=>{
+    const l = (local.quizzes||{})[k], r = (remote.quizzes||{})[k];
+    if(l && r) merged.quizzes[k] = (l.updatedAt >= r.updatedAt) ? l : r;
+    else merged.quizzes[k] = l || r;
+  });
+  const resKeys = new Set([...Object.keys(local.results||{}), ...Object.keys(remote.results||{})]);
+  resKeys.forEach(k=>{
+    const l = (local.results||{})[k], r = (remote.results||{})[k];
+    if(l && r) merged.results[k] = (l.updatedAt >= r.updatedAt) ? l : r;
+    else merged.results[k] = l || r;
+  });
+  return merged;
+}
+
+/* -------- Quiz CRUD -------- */
+async function dbSaveQuiz(quiz){
+  quiz.updatedAt = now();
+  const existing = STATE.manifest.quizzes[quiz.id];
+  const ids = await writeRecord(existing ? existing.ids : null, JSON.stringify(quiz));
+  await saveManifest(m=>{
+    m.quizzes[quiz.id] = {
+      ids, title: quiz.title, code: quiz.code, status: quiz.status,
+      updatedAt: quiz.updatedAt, questionCount: quiz.questions.length, totalScore: quiz.totalScore
+    };
+  });
+  return quiz;
+}
+async function dbGetQuiz(quizId, {forceRemote}={}){
+  const idx = STATE.manifest.quizzes[quizId];
+  if(!idx) return null;
+  if(!forceRemote){
+    const cachedFull = localStorage.getItem('qm_quiz_'+quizId);
+    if(cachedFull){
+      try{
+        const parsed = JSON.parse(cachedFull);
+        if(parsed.updatedAt === idx.updatedAt) return parsed;
+      }catch(e){}
+    }
+  }
+  const text = await readRecord(idx.ids);
+  const quiz = JSON.parse(text);
+  try{ localStorage.setItem('qm_quiz_'+quizId, JSON.stringify(quiz)); }catch(e){}
+  return quiz;
+}
+async function dbFindQuizByCode(code){
+  const entries = Object.entries(STATE.manifest.quizzes);
+  for(const [id, idx] of entries){
+    if((idx.code||'').toLowerCase() === code.toLowerCase()){
+      return dbGetQuiz(id);
+    }
+  }
+  return null;
+}
+async function dbDeleteQuiz(quizId){
+  const idx = STATE.manifest.quizzes[quizId];
+  if(!idx) return;
+  for(const id of idx.ids) tgDeleteMessage(id);
+  await saveManifest(m=>{ delete m.quizzes[quizId]; });
+  localStorage.removeItem('qm_quiz_'+quizId);
+}
+
+/* -------- Result / Attempt CRUD -------- */
+async function dbSaveResult(result){
+  result.updatedAt = now();
+  const existing = STATE.manifest.results[result.resultCode];
+  const ids = await writeRecord(existing ? existing.ids : null, JSON.stringify(result));
+  await saveManifest(m=>{
+    m.results[result.resultCode] = {
+      ids, attemptId: result.attemptId, quizId: result.quizId, quizTitle: result.quizTitle,
+      studentName: result.studentName, status: result.status, published: result.published,
+      totalScore: result.totalScore, maxScore: result.maxScore, submittedAt: result.submittedAt,
+      updatedAt: result.updatedAt
+    };
+  });
+  return result;
+}
+async function dbGetResult(resultCode){
+  const idx = STATE.manifest.results[resultCode];
+  if(!idx) return null;
+  const text = await readRecord(idx.ids);
+  return JSON.parse(text);
+}
+async function dbDeleteResult(resultCode){
+  const idx = STATE.manifest.results[resultCode];
+  if(!idx) return;
+  for(const id of idx.ids) tgDeleteMessage(id);
+  await saveManifest(m=>{ delete m.results[resultCode]; });
+}
+
+/* =========================================================
+   4) حماية فقدان الإجابات (WIP) — LocalStorage فقط
+   ========================================================= */
+function wipKey(quizId, studentName){ return LS_WIP_PREFIX+quizId+'_'+(studentName||'anon'); }
+function saveWip(quizId, studentName, data){
+  try{ localStorage.setItem(wipKey(quizId,studentName), JSON.stringify(data)); }catch(e){}
+}
+function loadWip(quizId, studentName){
+  try{
+    const raw = localStorage.getItem(wipKey(quizId,studentName));
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function clearWip(quizId, studentName){
+  localStorage.removeItem(wipKey(quizId,studentName));
+}
+
+/* =========================================================
+   5) المنطق: تصحيح تلقائي، حساب الدرجات، نشر
+   ========================================================= */
+function computeAutoScore(quiz, answers){
+  let mcqScore = 0, essayMax = 0, mcqMax = 0;
+  const graded = answers.map(a=>{
+    const q = quiz.questions.find(q=>q.id===a.questionId);
+    if(!q) return a;
+    if(q.type==='mcq'){
+      const correct = a.choiceId === q.correctChoiceId;
+      const sc = correct ? q.score : 0;
+      mcqScore += sc; mcqMax += q.score;
+      return {...a, autoScore: sc, maxScore: q.score};
+    }else{
+      essayMax += q.score;
+      return {...a, manualScore: a.manualScore ?? null, maxScore: q.score};
+    }
+  });
+  return {answers: graded, mcqScore, mcqMax, essayMax};
+}
+function hasUngraded(result){
+  return result.answers.some(a=>a.type==='essay' && (a.manualScore===null || a.manualScore===undefined));
+}
+function recomputeTotals(result){
+  let total = 0;
+  result.answers.forEach(a=>{
+    if(a.type==='mcq') total += (a.autoScore||0);
+    else total += (a.manualScore||0);
+  });
+  result.totalScore = total;
+  result.percentage = result.maxScore ? Math.round((total/result.maxScore)*1000)/10 : 0;
+  result.status = hasUngraded(result) ? 'pending' : 'corrected';
+}
+
+/* =========================================================
+   6) الراوتر البسيط
+   ========================================================= */
+function go(name, params={}){
+  STATE.route = {name, ...params};
+  window.scrollTo(0,0);
+  render();
+}
+window.go = go;
+window.toggleTheme = toggleTheme;
+window.manualSync = manualSync;
+
+/* =========================================================
+   7) العرض (Render)
+   ========================================================= */
+const appEl = document.getElementById('app');
+
+function render(){
+  document.getElementById('brandName').textContent = PLATFORM_NAME;
+  const r = STATE.route;
+  if(!STATE.manifest){
+    appEl.innerHTML = `<div class="loading-screen"><div class="spinner"></div><div>جاري تحميل البيانات...</div></div>`;
+    return;
+  }
+  try{
+    if(r.name==='home') return renderHome();
+    if(r.name==='searchResult') return renderSearchResult();
+    if(r.name==='quizIntro') return renderQuizIntro(r.quizId);
+    if(r.name==='quizTake') return renderQuizTake(r.quizId);
+    if(r.name==='quizResult') return renderQuizResultScreen(r.resultCode);
+    if(r.name==='admin') return renderAdmin();
+    if(r.name==='adminQuizEdit') return renderQuizEdit(r.quizId);
+    if(r.name==='adminGrade') return renderGradeScreen(r.resultCode);
+    if(r.name==='adminPreview') return renderPreview(r.quizId);
+    return renderHome();
+  }catch(e){
+    console.error(e);
+    appEl.innerHTML = `<div class="card"><h2>حدث خطأ غير متوقع</h2><p class="muted">${escapeHtml(e.message)}</p>
+    <div class="btn-row" style="margin-top:14px"><button class="btn btn-primary" onclick="go('home')">العودة للرئيسية</button></div></div>`;
+  }
+}
+
+/* ---------------- الصفحة الرئيسية ---------------- */
+function renderHome(){
+  appEl.innerHTML = `
+  <div class="card" style="text-align:center;padding:30px 20px">
+    <h1>${escapeHtml(PLATFORM_NAME)}</h1>
+    <p class="muted">أدخل كود الاختبار للبدء</p>
+    <div class="field" style="margin-top:18px;text-align:right">
+      <input type="text" id="entryCode" class="big-input" placeholder="XXXXXXXX" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="handleEntry()">دخول</button>
+    <div class="divider"></div>
+    <button class="link-btn" onclick="go('searchResult')">🔎 عرض النتيجة</button>
+  </div>
+  ${!STATE.online ? `<div class="card card-tight"><p class="muted" style="margin:0">🔴 يجب الاتصال بالانترنت</p></div>` : ''}
+  <div class="footer-note">Quiz Master — منصة اختبارات تعمل بالكامل من المتصفح</div>
+  `;
+  document.getElementById('entryCode').focus();
+  document.getElementById('entryCode').addEventListener('keydown', e=>{ if(e.key==='Enter') handleEntry(); });
+}
+async function handleEntry(){
+  const val = (document.getElementById('entryCode').value||'').trim();
+  if(!val){ toast('الرجاء إدخال الكود','err'); return; }
+  if(ADMIN_PASSWORD && !ADMIN_PASSWORD.includes('ضع_') && val === ADMIN_PASSWORD){
+    STATE.isAdmin = true;
+    toast('تم الدخول كمدير','ok');
+    go('admin');
+    return;
+  }
+  const quiz = await dbFindQuizByCode(val);
+  if(!quiz){ toast('كود غير صحيح','err'); return; }
+  go('quizIntro', {quizId: quiz.id});
+}
+
+/* ---------------- بحث عن نتيجة ---------------- */
+function renderSearchResult(){
+  appEl.innerHTML = `
+  <div class="card">
+    <h2>🔎 البحث عن النتيجة</h2>
+    <div class="field">
+      <label>كود النتيجة</label>
+      <input type="text" id="rCode" class="big-input" placeholder="XXXXXXXX">
+    </div>
+    <button class="btn btn-primary" onclick="doSearchResult()">بحث</button>
+    <div id="rOut" style="margin-top:16px"></div>
+  </div>
+  <button class="link-btn" onclick="go('home')">← العودة</button>
+  `;
+  document.getElementById('rCode').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearchResult(); });
+}
+async function doSearchResult(){
+  const code = (document.getElementById('rCode').value||'').trim().toUpperCase();
+  const out = document.getElementById('rOut');
+  if(!code){ toast('أدخل كود النتيجة','err'); return; }
+  out.innerHTML = `<div style="text-align:center;padding:14px"><span class="spinner"></span></div>`;
+  const idx = STATE.manifest.results[code];
+  if(!idx){ out.innerHTML = `<p class="muted">لم يتم العثور على نتيجة بهذا الكود.</p>`; return; }
+  const result = await dbGetResult(code);
+  if(!result){ out.innerHTML = `<p class="muted">تعذّر تحميل بيانات النتيجة.</p>`; return; }
+  if(result.status==='pending'){
+    out.innerHTML = `<div class="card-tight" style="border:1px solid var(--border);border-radius:10px"><span class="badge pending">🟡 قيد التصحيح</span><p class="muted">لم يتم الانتهاء من تصحيح اختبارك بعد.</p></div>`;
+    return;
+  }
+  if(!result.published){
+    out.innerHTML = `<div class="card-tight" style="border:1px solid var(--border);border-radius:10px"><span class="badge done">🟢 تم التصحيح</span><p class="muted">تم الانتهاء من التصحيح، لكن النتائج لم يتم نشرها بعد.</p></div>`;
+    return;
+  }
+  out.innerHTML = `
+  <div class="card-tight" style="border:1px solid var(--border);border-radius:10px">
+    <span class="badge done">🟢 تم التصحيح</span>
+    <h3 style="margin-top:12px">${escapeHtml(result.studentName)}</h3>
+    <p class="muted" style="margin:0">${escapeHtml(result.quizTitle)}</p>
+    <div class="grid-3" style="margin-top:14px">
+      <div class="stat-box"><div class="n">${result.totalScore}</div><div class="l">الدرجة</div></div>
+      <div class="stat-box"><div class="n">${result.maxScore}</div><div class="l">الدرجة الكاملة</div></div>
+      <div class="stat-box"><div class="n">${result.percentage}%</div><div class="l">النسبة</div></div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- مقدمة الاختبار ---------------- */
+async function renderQuizIntro(quizId){
+  appEl.innerHTML = `<div class="loading-screen"><div class="spinner"></div></div>`;
+  const quiz = await dbGetQuiz(quizId);
+  if(!quiz || quiz.status!=='open'){
+    appEl.innerHTML = `<div class="card"><h2>الاختبار غير متاح</h2><p class="muted">هذا الاختبار غير موجود أو تم إغلاقه.</p>
+    <button class="btn btn-primary" style="margin-top:12px" onclick="go('home')">العودة</button></div>`;
+    return;
+  }
+  const wip = loadWip(quizId, null);
+  appEl.innerHTML = `
+  <div class="card">
+    <h1>${escapeHtml(quiz.title)}</h1>
+    <p class="muted">${escapeHtml(quiz.description||'')}</p>
+    <div class="grid-3" style="margin-top:16px">
+      <div class="stat-box"><div class="n">${quiz.questions.length}</div><div class="l">عدد الأسئلة</div></div>
+      <div class="stat-box"><div class="n">${quiz.totalScore}</div><div class="l">الدرجة الكلية</div></div>
+      <div class="stat-box"><div class="n">${quiz.duration||'—'}</div><div class="l">الدقائق</div></div>
+    </div>
+    <div class="field" style="margin-top:20px">
+      <label>اسمك</label>
+      <input type="text" id="studentName" placeholder="اكتب اسمك الكامل">
+    </div>
+    <button class="btn btn-primary" onclick="startQuizFlow('${quizId}')">ابدأ الاختبار</button>
+  </div>
+  <button class="link-btn" onclick="go('home')">← العودة</button>
+  `;
+  if(wip && wip.studentName) document.getElementById('studentName').value = wip.studentName;
+}
+async function startQuizFlow(quizId){
+  const nameEl = document.getElementById('studentName');
+  const name = (nameEl.value||'').trim();
+  if(!name){ toast('الرجاء إدخال الاسم','err'); return; }
+  const existingWip = loadWip(quizId, name);
+  if(existingWip && !existingWip.submitted){
+    openModal(`
+      <h2>لديك اختبار غير مكتمل</h2>
+      <p class="muted">هل تريد المتابعة من حيث توقفت؟</p>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" onclick="closeModal();resumeQuiz('${quizId}','${escapeHtml(name).replace(/'/g,"\\'")}')">متابعة الاختبار</button>
+        <button class="btn btn-ghost" onclick="closeModal();freshQuiz('${quizId}','${escapeHtml(name).replace(/'/g,"\\'")}')">بدء محاولة جديدة</button>
+      </div>
+    `);
+    return;
+  }
+  freshQuiz(quizId, name);
+}
+async function freshQuiz(quizId, name){
+  const quiz = await dbGetQuiz(quizId);
+  let qOrder = quiz.questions.map(q=>q.id);
+  if(quiz.shuffleQuestions) qOrder = shuffleArr(qOrder);
+  const choiceOrders = {};
+  quiz.questions.forEach(q=>{
+    if(q.type==='mcq'){
+      let ids = q.choices.map(c=>c.id);
+      if(quiz.shuffleChoices) ids = shuffleArr(ids);
+      choiceOrders[q.id] = ids;
+    }
+  });
+  const wip = {
+    studentName:name, quizId, qOrder, choiceOrders, current:0,
+    answers:{}, startedAt: now(), submitted:false
+  };
+  saveWip(quizId, name, wip);
+  go('quizTake', {quizId});
+}
+function resumeQuiz(quizId, name){
+  go('quizTake', {quizId, _resumeName:name});
+}
+
+/* ---------------- شاشة حل الاختبار ---------------- */
+let _liveQuiz = null;
+let _liveWip = null;
+async function renderQuizTake(quizId){
+  appEl.innerHTML = `<div class="loading-screen"><div class="spinner"></div></div>`;
+  const quiz = await dbGetQuiz(quizId);
+  if(!quiz){ go('home'); return; }
+  // ابحث عن أي wip غير مسلّم لهذا الكويز
+  let name = null, wip = null;
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith(LS_WIP_PREFIX+quizId+'_')){
+      const w = JSON.parse(localStorage.getItem(k));
+      if(!w.submitted){ wip = w; name = w.studentName; break; }
+    }
+  }
+  if(!wip){ go('quizIntro',{quizId}); return; }
+  _liveQuiz = quiz; _liveWip = wip;
+  renderQuestionView();
+}
+function renderQuestionView(){
+  const quiz = _liveQuiz, wip = _liveWip;
+  const qid = wip.qOrder[wip.current];
+  const q = quiz.questions.find(q=>q.id===qid);
+  const total = wip.qOrder.length;
+  const pct = Math.round(((wip.current)/total)*100);
+  let bodyHtml = '';
+  if(q.type==='mcq'){
+    const order = wip.choiceOrders[q.id];
+    bodyHtml = order.map(cid=>{
+      const c = q.choices.find(c=>c.id===cid);
+      const selected = wip.answers[q.id]===cid;
+      return `<div class="choice ${selected?'selected':''}" onclick="selectChoice('${q.id}','${cid}')">
+        <div class="dot"></div><div>${escapeHtml(c.text)}</div>
+      </div>`;
+    }).join('');
+  }else{
+    const val = wip.answers[q.id]||'';
+    bodyHtml = `<textarea id="essayInput" rows="6" placeholder="اكتب إجابتك هنا...">${escapeHtml(val)}</textarea>`;
+  }
+  appEl.innerHTML = `
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="margin:0">سؤال ${wip.current+1} من ${total}</h3>
+      <span class="qtype-tag">${q.type==='mcq'?'اختياري':'مقالي'} · ${q.score} درجة</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <h2 style="margin-top:18px;line-height:1.6">${escapeHtml(q.text)}</h2>
+    <div style="margin-top:16px">${bodyHtml}</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" ${wip.current===0?'disabled':''} onclick="prevQuestion()">السابق</button>
+    ${wip.current<total-1 ? `<button class="btn btn-primary" onclick="nextQuestion()">التالي</button>`
+      : `<button class="btn btn-primary" onclick="confirmSubmit()">تسليم الاختبار</button>`}
+  </div>
+  `;
+}
+function persistWip(){ saveWip(_liveWip.quizId, _liveWip.studentName, _liveWip); }
+function selectChoice(qid, cid){
+  _liveWip.answers[qid] = cid;
+  persistWip();
+  renderQuestionView();
+}
+function captureEssay(){
+  const q = _liveQuiz.questions.find(q=>q.id===_liveWip.qOrder[_liveWip.current]);
+  if(q.type==='essay'){
+    const el = document.getElementById('essayInput');
+    if(el) _liveWip.answers[q.id] = el.value;
+  }
+}
+function nextQuestion(){
+  captureEssay();
+  _liveWip.current = Math.min(_liveWip.current+1, _liveWip.qOrder.length-1);
+  persistWip();
+  renderQuestionView();
+}
+function prevQuestion(){
+  captureEssay();
+  _liveWip.current = Math.max(_liveWip.current-1, 0);
+  persistWip();
+  renderQuestionView();
+}
+function confirmSubmit(){
+  captureEssay();
+  persistWip();
+  openModal(`
+    <h2>تأكيد التسليم</h2>
+    <p class="muted">هل أنت متأكد من تسليم الاختبار؟ بعد التسليم لن تستطيع تعديل إجاباتك.</p>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-primary" onclick="closeModal();doSubmitQuiz()">تسليم</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+async function doSubmitQuiz(){
+  appEl.innerHTML = `<div class="loading-screen"><div class="spinner"></div><div>جاري إرسال الاختبار...</div></div>`;
+  const quiz = _liveQuiz, wip = _liveWip;
+  const answers = quiz.questions.map(q=>{
+    if(q.type==='mcq'){
+      return {questionId:q.id, type:'mcq', choiceId: wip.answers[q.id]||null};
+    }else{
+      return {questionId:q.id, type:'essay', essayText: wip.answers[q.id]||''};
+    }
+  });
+  const {answers:graded, mcqScore, mcqMax, essayMax} = computeAutoScore(quiz, answers);
+  const result = {
+    attemptId: uid(12),
+    resultCode: resultCode(),
+    quizId: quiz.id,
+    quizTitle: quiz.title,
+    studentName: wip.studentName,
+    submittedAt: now(),
+    answers: graded,
+    totalScore: mcqScore,
+    maxScore: mcqMax+essayMax,
+    percentage: 0,
+    status: essayMax>0 ? 'pending' : 'corrected',
+    published: essayMax===0 && quiz.publishResultsImmediately ? true : false,
+  };
+  recomputeTotals(result);
+  if(essayMax===0){
+    result.published = !!quiz.publishResultsImmediately;
+  }
+  await dbSaveResult(result);
+  wip.submitted = true;
+  saveWip(wip.quizId, wip.studentName, wip);
+  clearWip(wip.quizId, wip.studentName);
+  tgNotify(`📝 محاولة جديدة\n\nالاختبار: ${quiz.title}\nالطالب: ${wip.studentName}\nResult Code: ${result.resultCode}\nAttempt ID: ${result.attemptId}\nوقت التسليم: ${fmtDate(result.submittedAt)}\nالحالة: ${result.status==='pending'?'قيد التصحيح':'تم التصحيح'}`);
+  go('quizResult', {resultCode: result.resultCode});
+}
+function renderQuizResultScreen(code){
+  appEl.innerHTML = `
+  <div class="card" style="text-align:center">
+    <h1>✅ تم تسليم الاختبار بنجاح</h1>
+    <p class="muted">احتفظ بهذا الكود لمعرفة نتيجتك لاحقًا.</p>
+    <div class="result-code-box">
+      <div style="font-size:13px;color:var(--ink-dim)">كود النتيجة الخاص بك</div>
+      <div class="code" id="codeDisplay">${code}</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="copyCode('${code}')">نسخ الكود</button>
+      <button class="btn btn-primary" onclick="go('searchResult')">البحث عن النتيجة</button>
+    </div>
+  </div>
+  <button class="link-btn" onclick="go('home')">← الصفحة الرئيسية</button>
+  `;
+}
+function copyCode(code){
+  navigator.clipboard?.writeText(code).then(()=>toast('تم نسخ الكود','ok')).catch(()=>toast('تعذّر النسخ','err'));
+}
+
+/* ---------------- Modal helper ---------------- */
+function openModal(html){
+  const bd = document.createElement('div');
+  bd.className='modal-backdrop';
+  bd.id='modalBackdrop';
+  bd.innerHTML = `<div class="modal">${html}</div>`;
+  bd.addEventListener('click', e=>{ if(e.target===bd) closeModal(); });
+  document.body.appendChild(bd);
+}
+function closeModal(){
+  const bd = document.getElementById('modalBackdrop');
+  if(bd) bd.remove();
+}
+window.closeModal = closeModal;
+window.selectChoice = selectChoice;
+window.nextQuestion = nextQuestion;
+window.prevQuestion = prevQuestion;
+window.confirmSubmit = confirmSubmit;
+window.doSubmitQuiz = doSubmitQuiz;
+window.copyCode = copyCode;
+window.startQuizFlow = startQuizFlow;
+window.freshQuiz = freshQuiz;
+window.resumeQuiz = resumeQuiz;
+window.handleEntry = handleEntry;
+window.doSearchResult = doSearchResult;
+
+/* =========================================================
+   8) لوحة تحكم المدير
+   ========================================================= */
+let _adminTab = 'dashboard';
+function requireAdmin(){
+  if(!STATE.isAdmin){ go('home'); return false; }
+  return true;
+}
+function exitAdmin(){
+  STATE.isAdmin = false;
+  toast('تم الخروج من وضع المدير','ok');
+  go('home');
+}
+window.exitAdmin = exitAdmin;
+
+function renderAdmin(){
+  if(!requireAdmin()) return;
+  const m = STATE.manifest;
+  const quizzes = Object.entries(m.quizzes);
+  const results = Object.entries(m.results);
+  appEl.innerHTML = `
+  <div class="card card-tight" style="display:flex;justify-content:space-between;align-items:center">
+    <div><strong>وضع المدير</strong><div class="li-sub">آخر مزامنة: ${timeAgo(STATE.lastSync)}</div></div>
+    <button class="btn btn-danger btn-sm" onclick="exitAdmin()">خروج من وضع المدير</button>
+  </div>
+  <div class="tabs">
+    <div class="tab ${_adminTab==='dashboard'?'active':''}" onclick="setAdminTab('dashboard')">Dashboard</div>
+    <div class="tab ${_adminTab==='quizzes'?'active':''}" onclick="setAdminTab('quizzes')">الكويزات</div>
+    <div class="tab ${_adminTab==='grading'?'active':''}" onclick="setAdminTab('grading')">إجابات الطلاب</div>
+    <div class="tab ${_adminTab==='backup'?'active':''}" onclick="setAdminTab('backup')">نسخ احتياطي</div>
+  </div>
+  <div id="adminBody"></div>
+  `;
+  renderAdminTab();
+}
+function setAdminTab(t){ _adminTab = t; renderAdminTab(); }
+window.setAdminTab = setAdminTab;
+
+function renderAdminTab(){
+  const body = document.getElementById('adminBody');
+  const m = STATE.manifest;
+  if(_adminTab==='dashboard'){
+    const quizzes = Object.values(m.quizzes);
+    const results = Object.values(m.results);
+    const pending = results.filter(r=>r.status==='pending').length;
+    const corrected = results.filter(r=>r.status==='corrected').length;
+    body.innerHTML = `
+    <div class="grid-3">
+      <div class="stat-box"><div class="n">${quizzes.length}</div><div class="l">عدد الكويزات</div></div>
+      <div class="stat-box"><div class="n">${results.length}</div><div class="l">عدد المحاولات</div></div>
+      <div class="stat-box"><div class="n">${results.length}</div><div class="l">عدد النتائج</div></div>
+      <div class="stat-box"><div class="n">${pending}</div><div class="l">قيد التصحيح</div></div>
+      <div class="stat-box"><div class="n">${corrected}</div><div class="l">تم تصحيحها</div></div>
+      <div class="stat-box"><div class="n">${STATE.online?'🟢':'🔴'}</div><div class="l">حالة الاتصال</div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <button class="btn btn-primary" onclick="createQuizPrompt()">+ إضافة Quiz جديد</button>
+    </div>
+    <div class="card">
+      <h3>نشر النتائج</h3>
+      <p class="muted">عند الضغط، تصبح كل النتائج التي حالتها "تم التصحيح" متاحة للطلاب دفعة واحدة.</p>
+      <button class="btn btn-ghost" onclick="publishAllResults()">نشر النتائج للطلاب</button>
+    </div>
+    `;
+  }else if(_adminTab==='quizzes'){
+    const quizzes = Object.entries(m.quizzes);
+    body.innerHTML = `
+    <div class="card card-tight">
+      <button class="btn btn-primary" onclick="createQuizPrompt()">+ إضافة Quiz جديد</button>
+    </div>
+    ${quizzes.length===0 ? `<div class="empty-state"><div class="em">📋</div>لا توجد اختبارات بعد</div>` :
+    quizzes.map(([id,q])=>`
+      <div class="list-item" onclick="go('adminQuizEdit',{quizId:'${id}'})">
+        <div class="li-main">
+          <div class="li-title">${escapeHtml(q.title)}</div>
+          <div class="li-sub">كود: ${escapeHtml(q.code)} · ${q.questionCount} سؤال · ${q.totalScore} درجة</div>
+        </div>
+        <span class="badge ${q.status==='open'?'open':'closed'}">${q.status==='open'?'متاح':'مغلق'}</span>
+      </div>
+    `).join('')}
+    `;
+  }else if(_adminTab==='grading'){
+    renderGradingList(body);
+  }else if(_adminTab==='backup'){
+    body.innerHTML = `
+    <div class="card">
+      <h3>تصدير نسخة احتياطية</h3>
+      <p class="muted">يتم تصدير كل البيانات (الكويزات والنتائج) في ملف JSON.</p>
+      <button class="btn btn-ghost" onclick="exportBackup()">تصدير نسخة احتياطية</button>
+    </div>
+    <div class="card">
+      <h3>استيراد نسخة احتياطية</h3>
+      <p class="muted">اختر ملف JSON تم تصديره مسبقًا لاستعادة البيانات.</p>
+      <input type="file" id="importFile" accept=".json" style="margin-bottom:10px">
+      <button class="btn btn-ghost" onclick="importBackupPrompt()">استيراد نسخة احتياطية</button>
+    </div>
+    <div class="card">
+      <h3>تحديث البيانات</h3>
+      <p class="muted">آخر مزامنة: ${timeAgo(STATE.lastSync)}</p>
+      <button class="btn btn-ghost" onclick="manualSync()">تحديث البيانات الآن</button>
+    </div>
+    `;
+  }
+}
+
+/* ---- إنشاء / تعديل Quiz ---- */
+function createQuizPrompt(){
+  openModal(`
+    <h2>إضافة Quiz جديد</h2>
+    <div class="field"><label>اسم الاختبار</label><input type="text" id="nqTitle"></div>
+    <div class="field"><label>كود الاختبار</label><input type="text" id="nqCode" value="${uid(6)}"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="doCreateQuiz()">إنشاء</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+async function doCreateQuiz(){
+  const title = document.getElementById('nqTitle').value.trim();
+  const code = document.getElementById('nqCode').value.trim();
+  if(!title || !code){ toast('أكمل البيانات المطلوبة','err'); return; }
+  closeModal();
+  const quiz = {
+    id: uid(10), title, description:'', code, duration:null, totalScore:0,
+    status:'closed', shuffleQuestions:false, shuffleChoices:false,
+    oneAttemptPerStudent:false, publishResultsImmediately:false,
+    questions:[], createdAt: now(), updatedAt: now()
+  };
+  await dbSaveQuiz(quiz);
+  toast('تم إنشاء الاختبار','ok');
+  go('adminQuizEdit',{quizId:quiz.id});
+}
+window.createQuizPrompt = createQuizPrompt;
+window.doCreateQuiz = doCreateQuiz;
+
+let _editingQuiz = null;
+async function renderQuizEdit(quizId){
+  if(!requireAdmin()) return;
+  appEl.innerHTML = `<div class="loading-screen"><div class="spinner"></div></div>`;
+  const quiz = await dbGetQuiz(quizId, {forceRemote:true});
+  if(!quiz){ toast('الاختبار غير موجود','err'); go('admin'); return; }
+  _editingQuiz = quiz;
+  drawQuizEdit();
+}
+function drawQuizEdit(){
+  const q = _editingQuiz;
+  appEl.innerHTML = `
+  <button class="link-btn" onclick="go('admin')">← رجوع للوحة التحكم</button>
+  <div class="card">
+    <div class="field"><label>اسم الكويز</label><input type="text" id="qTitle" value="${escapeHtml(q.title)}" onchange="q_field('title',this.value)"></div>
+    <div class="field"><label>الوصف</label><textarea id="qDesc" onchange="q_field('description',this.value)">${escapeHtml(q.description||'')}</textarea></div>
+    <div class="grid-2">
+      <div class="field"><label>كود الكويز</label><input type="text" id="qCode" value="${escapeHtml(q.code)}" onchange="q_field('code',this.value)"></div>
+      <div class="field"><label>مدة الاختبار (دقائق - اختياري)</label><input type="number" id="qDur" value="${q.duration||''}" onchange="q_field('duration',this.value?parseInt(this.value):null)"></div>
+    </div>
+    <div class="chip-toggle"><span>حالة الكويز: متاح</span>
+      <label class="switch"><input type="checkbox" ${q.status==='open'?'checked':''} onchange="q_field('status',this.checked?'open':'closed')"><span class="slider"></span></label>
+    </div>
+    <div class="chip-toggle"><span>ترتيب الأسئلة عشوائيًا</span>
+      <label class="switch"><input type="checkbox" ${q.shuffleQuestions?'checked':''} onchange="q_field('shuffleQuestions',this.checked)"><span class="slider"></span></label>
+    </div>
+    <div class="chip-toggle"><span>ترتيب الاختيارات عشوائيًا</span>
+      <label class="switch"><input type="checkbox" ${q.shuffleChoices?'checked':''} onchange="q_field('shuffleChoices',this.checked)"><span class="slider"></span></label>
+    </div>
+    <div class="chip-toggle"><span>محاولة واحدة فقط لكل طالب</span>
+      <label class="switch"><input type="checkbox" ${q.oneAttemptPerStudent?'checked':''} onchange="q_field('oneAttemptPerStudent',this.checked)"><span class="slider"></span></label>
+    </div>
+    <div class="chip-toggle"><span>نشر النتائج فور انتهاء التصحيح</span>
+      <label class="switch"><input type="checkbox" ${q.publishResultsImmediately?'checked':''} onchange="q_field('publishResultsImmediately',this.checked)"><span class="slider"></span></label>
+    </div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn btn-ghost" onclick="go('adminPreview',{quizId:'${q.id}'})">معاينة الاختبار</button>
+      <button class="btn btn-ghost" onclick="duplicateQuiz()">نسخ الاختبار</button>
+      <button class="btn btn-danger" onclick="deleteQuizConfirm()">حذف الاختبار</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>الأسئلة (${q.questions.length}) — الدرجة الكلية: ${q.totalScore}</h2>
+    ${q.questions.length===0?`<div class="empty-state"><div class="em">❓</div>لا توجد أسئلة بعد</div>`:''}
+    ${q.questions.map((qq,i)=>renderQuestionCard(qq,i)).join('')}
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn btn-ghost" onclick="addQuestionPrompt('mcq')">+ سؤال اختياري</button>
+      <button class="btn btn-ghost" onclick="addQuestionPrompt('essay')">+ سؤال مقالي</button>
+    </div>
+  </div>
+  `;
+}
+function renderQuestionCard(qq, i){
+  const total = _editingQuiz.questions.length;
+  let choicesHtml = '';
+  if(qq.type==='mcq'){
+    choicesHtml = qq.choices.map(c=>`
+      <div class="choice ${c.id===qq.correctChoiceId?'selected':''}" style="cursor:default;padding:9px 12px">
+        <div class="dot" onclick="setCorrect('${qq.id}','${c.id}')" style="cursor:pointer"></div>
+        <input type="text" value="${escapeHtml(c.text)}" style="flex:1;background:transparent;border:none;color:inherit;padding:2px" onchange="editChoiceText('${qq.id}','${c.id}',this.value)">
+        <button class="link-btn" style="padding:0" onclick="removeChoice('${qq.id}','${c.id}')">✕</button>
+      </div>
+    `).join('') + `<button class="link-btn" onclick="addChoice('${qq.id}')">+ إضافة اختيار</button>`;
+  }
+  return `
+  <div class="qcard">
+    <div class="qcard-head">
+      <span class="qtype-tag">${qq.type==='mcq'?'اختياري':'مقالي'} · سؤال ${i+1}</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="reorder-btns">
+          <button ${i===0?'disabled':''} onclick="moveQuestion(${i},-1)">↑</button>
+          <button ${i===total-1?'disabled':''} onclick="moveQuestion(${i},1)">↓</button>
+        </div>
+        <button class="link-btn" onclick="deleteQuestionConfirm('${qq.id}')">حذف</button>
+      </div>
+    </div>
+    <textarea onchange="editQField('${qq.id}','text',this.value)" rows="2">${escapeHtml(qq.text)}</textarea>
+    <div class="field" style="margin-top:8px;max-width:140px">
+      <label>الدرجة</label>
+      <input type="number" value="${qq.score}" onchange="editQField('${qq.id}','score',parseFloat(this.value)||0)">
+    </div>
+    ${choicesHtml}
+  </div>`;
+}
+function recalcTotal(){ _editingQuiz.totalScore = _editingQuiz.questions.reduce((s,q)=>s+(q.score||0),0); }
+async function persistQuiz(){ await dbSaveQuiz(_editingQuiz); }
+function q_field(k,v){ _editingQuiz[k]=v; persistQuiz(); }
+window.q_field = q_field;
+
+function addQuestionPrompt(type){
+  const qq = {
+    id: uid(8), type, text:'', score: 1,
+    choices: type==='mcq' ? [{id:uid(4),text:'A'},{id:uid(4),text:'B'}] : undefined,
+    correctChoiceId: type==='mcq' ? null : undefined
+  };
+  if(type==='mcq') qq.correctChoiceId = qq.choices[0].id;
+  _editingQuiz.questions.push(qq);
+  recalcTotal(); persistQuiz(); drawQuizEdit();
+}
+function editQField(qid,k,v){
+  const qq = _editingQuiz.questions.find(q=>q.id===qid);
+  qq[k]=v;
+  if(k==='score') recalcTotal();
+  persistQuiz();
+  if(k==='score') drawQuizEdit();
+}
+function setCorrect(qid,cid){
+  const qq = _editingQuiz.questions.find(q=>q.id===qid);
+  qq.correctChoiceId = cid;
+  persistQuiz(); drawQuizEdit();
+}
+function editChoiceText(qid,cid,val){
+  const qq = _editingQuiz.questions.find(q=>q.id===qid);
+  const c = qq.choices.find(c=>c.id===cid);
+  c.text = val; persistQuiz();
+}
+function addChoice(qid){
+  const qq = _editingQuiz.questions.find(q=>q.id===qid);
+  qq.choices.push({id:uid(4), text:'اختيار جديد'});
+  persistQuiz(); drawQuizEdit();
+}
+function removeChoice(qid,cid){
+  const qq = _editingQuiz.questions.find(q=>q.id===qid);
+  if(qq.choices.length<=2){ toast('يجب أن يبقى اختياران على الأقل','err'); return; }
+  qq.choices = qq.choices.filter(c=>c.id!==cid);
+  if(qq.correctChoiceId===cid) qq.correctChoiceId = qq.choices[0].id;
+  persistQuiz(); drawQuizEdit();
+}
+function moveQuestion(i, dir){
+  const arr = _editingQuiz.questions;
+  const j = i+dir;
+  if(j<0||j>=arr.length) return;
+  [arr[i],arr[j]] = [arr[j],arr[i]];
+  persistQuiz(); drawQuizEdit();
+}
+function deleteQuestionConfirm(qid){
+  openModal(`
+    <h2>حذف السؤال</h2>
+    <p class="muted">هل أنت متأكد من حذف هذا السؤال؟ لا يمكن التراجع عن هذا الإجراء.</p>
+    <div class="btn-row">
+      <button class="btn btn-danger" onclick="closeModal();doDeleteQuestion('${qid}')">حذف</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+function doDeleteQuestion(qid){
+  _editingQuiz.questions = _editingQuiz.questions.filter(q=>q.id!==qid);
+  recalcTotal(); persistQuiz(); drawQuizEdit();
+}
+function deleteQuizConfirm(){
+  openModal(`
+    <h2>حذف الاختبار</h2>
+    <p class="muted">سيتم حذف الاختبار وكل بياناته نهائيًا. هل أنت متأكد؟</p>
+    <div class="btn-row">
+      <button class="btn btn-danger" onclick="closeModal();doDeleteQuiz()">حذف نهائي</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+async function doDeleteQuiz(){
+  await dbDeleteQuiz(_editingQuiz.id);
+  toast('تم حذف الاختبار','ok');
+  go('admin');
+}
+async function duplicateQuiz(){
+  const copy = JSON.parse(JSON.stringify(_editingQuiz));
+  copy.id = uid(10);
+  copy.code = uid(6);
+  copy.title = _editingQuiz.title + ' (نسخة)';
+  copy.status = 'closed';
+  copy.createdAt = now(); copy.updatedAt = now();
+  await dbSaveQuiz(copy);
+  toast('تم نسخ الاختبار','ok');
+  go('adminQuizEdit',{quizId:copy.id});
+}
+window.addQuestionPrompt = addQuestionPrompt;
+window.editQField = editQField;
+window.setCorrect = setCorrect;
+window.editChoiceText = editChoiceText;
+window.addChoice = addChoice;
+window.removeChoice = removeChoice;
+window.moveQuestion = moveQuestion;
+window.deleteQuestionConfirm = deleteQuestionConfirm;
+window.doDeleteQuestion = doDeleteQuestion;
+window.deleteQuizConfirm = deleteQuizConfirm;
+window.doDeleteQuiz = doDeleteQuiz;
+window.duplicateQuiz = duplicateQuiz;
+
+/* ---- معاينة الاختبار ---- */
+async function renderPreview(quizId){
+  if(!requireAdmin()) return;
+  const quiz = await dbGetQuiz(quizId);
+  appEl.innerHTML = `
+  <button class="link-btn" onclick="go('adminQuizEdit',{quizId:'${quizId}'})">← رجوع للتعديل</button>
+  <div class="card card-tight"><p class="muted" style="margin:0">👁️ وضع المعاينة — لن يتم تسجيل أي محاولة حقيقية.</p></div>
+  <div class="card">
+    <h1>${escapeHtml(quiz.title)}</h1>
+    <p class="muted">${escapeHtml(quiz.description||'')}</p>
+  </div>
+  ${quiz.questions.map((q,i)=>`
+    <div class="card">
+      <h3>سؤال ${i+1} · ${q.score} درجة</h3>
+      <p>${escapeHtml(q.text)}</p>
+      ${q.type==='mcq' ? q.choices.map(c=>`<div class="choice ${c.id===q.correctChoiceId?'selected':''}" style="cursor:default"><div class="dot"></div>${escapeHtml(c.text)}</div>`).join('') : `<textarea disabled placeholder="إجابة مقالية"></textarea>`}
+    </div>
+  `).join('')}
+  `;
+}
+
+/* ---- إجابات الطلاب / التصحيح ---- */
+let _gradeFilter = 'all';
+let _gradeQuizFilter = '';
+let _gradeSearch = '';
+function renderGradingList(body){
+  const m = STATE.manifest;
+  let results = Object.entries(m.results);
+  const quizzesOpts = Object.entries(m.quizzes).map(([id,q])=>`<option value="${id}" ${_gradeQuizFilter===id?'selected':''}>${escapeHtml(q.title)}</option>`).join('');
+  if(_gradeFilter==='pending') results = results.filter(([c,r])=>r.status==='pending');
+  if(_gradeFilter==='corrected') results = results.filter(([c,r])=>r.status==='corrected');
+  if(_gradeQuizFilter) results = results.filter(([c,r])=>r.quizId===_gradeQuizFilter);
+  if(_gradeSearch){
+    const s = _gradeSearch.toLowerCase();
+    results = results.filter(([c,r])=> (r.studentName||'').toLowerCase().includes(s) || c.toLowerCase().includes(s));
+  }
+  results.sort((a,b)=> (b[1].submittedAt||'').localeCompare(a[1].submittedAt||''));
+  body.innerHTML = `
+  <div class="card card-tight">
+    <div class="field" style="margin-bottom:8px"><input type="text" placeholder="بحث باسم الطالب أو كود النتيجة" value="${escapeHtml(_gradeSearch)}" oninput="setGradeSearch(this.value)"></div>
+    <div class="grid-2">
+      <select onchange="setGradeQuizFilter(this.value)">
+        <option value="">كل الكويزات</option>${quizzesOpts}
+      </select>
+      <select onchange="setGradeFilter(this.value)">
+        <option value="all" ${_gradeFilter==='all'?'selected':''}>كل المحاولات</option>
+        <option value="pending" ${_gradeFilter==='pending'?'selected':''}>قيد التصحيح</option>
+        <option value="corrected" ${_gradeFilter==='corrected'?'selected':''}>تم التصحيح</option>
+      </select>
+    </div>
+  </div>
+  ${results.length===0?`<div class="empty-state"><div class="em">🗂️</div>لا توجد محاولات مطابقة</div>`:''}
+  ${results.map(([code,r])=>`
+    <div class="list-item" onclick="go('adminGrade',{resultCode:'${code}'})">
+      <div class="li-main">
+        <div class="li-title">${escapeHtml(r.studentName)}</div>
+        <div class="li-sub">${escapeHtml(r.quizTitle||'')} · ${code} · ${fmtDate(r.submittedAt)}</div>
+      </div>
+      <span class="badge ${r.status==='pending'?'pending':'done'}">${r.status==='pending'?'🟡 قيد التصحيح':'🟢 تم التصحيح'}</span>
+    </div>
+  `).join('')}
+  `;
+}
+function setGradeFilter(v){ _gradeFilter=v; renderAdminTab(); }
+function setGradeQuizFilter(v){ _gradeQuizFilter=v; renderAdminTab(); }
+function setGradeSearch(v){ _gradeSearch=v; renderAdminTab(); }
+window.setGradeFilter = setGradeFilter;
+window.setGradeQuizFilter = setGradeQuizFilter;
+window.setGradeSearch = setGradeSearch;
+
+let _gradingResult = null;
+let _gradingQuiz = null;
+async function renderGradeScreen(code){
+  if(!requireAdmin()) return;
+  appEl.innerHTML = `<div class="loading-screen"><div class="spinner"></div></div>`;
+  const result = await dbGetResult(code);
+  if(!result){ toast('لم يتم العثور على المحاولة','err'); go('admin'); return; }
+  const quiz = await dbGetQuiz(result.quizId);
+  _gradingResult = result; _gradingQuiz = quiz;
+  drawGradeScreen();
+}
+function drawGradeScreen(){
+  const r = _gradingResult, quiz = _gradingQuiz;
+  appEl.innerHTML = `
+  <button class="link-btn" onclick="go('admin')">← رجوع لقائمة الإجابات</button>
+  <div class="card">
+    <h2>${escapeHtml(r.studentName)}</h2>
+    <p class="muted" style="margin:0">${escapeHtml(quiz?.title||r.quizTitle)} · Result Code: <span style="font-family:var(--mono)">${r.resultCode}</span></p>
+    <p class="muted" style="margin:4px 0 0">وقت التسليم: ${fmtDate(r.submittedAt)}</p>
+    <span class="badge ${r.status==='pending'?'pending':'done'}" style="margin-top:10px">${r.status==='pending'?'🟡 قيد التصحيح':'🟢 تم التصحيح'}</span>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn btn-danger" onclick="deleteAttemptConfirm()">حذف المحاولة</button>
+      ${r.status==='corrected'?`<button class="btn btn-ghost" onclick="reopenGrading()">إعادة فتح للتصحيح</button>`:''}
+    </div>
+  </div>
+  ${r.answers.map((a,i)=>{
+    const q = quiz?.questions.find(q=>q.id===a.questionId);
+    if(!q) return '';
+    if(a.type==='mcq'){
+      const correctChoice = q.choices.find(c=>c.id===q.correctChoiceId);
+      const studentChoice = q.choices.find(c=>c.id===a.choiceId);
+      const isCorrect = a.choiceId===q.correctChoiceId;
+      return `<div class="answer-box ${isCorrect?'correct':'wrong'}">
+        <div class="li-sub">سؤال ${i+1} · اختياري</div>
+        <p style="font-weight:600">${escapeHtml(q.text)}</p>
+        <p class="muted" style="margin:2px 0">إجابة الطالب: ${escapeHtml(studentChoice?.text||'لم يُجب')}</p>
+        <p class="muted" style="margin:2px 0">الإجابة الصحيحة: ${escapeHtml(correctChoice?.text||'')}</p>
+        <p style="margin:6px 0 0;font-weight:700">${a.autoScore} / ${a.maxScore}</p>
+      </div>`;
+    }else{
+      return `<div class="answer-box">
+        <div class="li-sub">سؤال ${i+1} · مقالي</div>
+        <p style="font-weight:600">${escapeHtml(q.text)}</p>
+        <p style="white-space:pre-wrap;background:var(--bg-elev);padding:10px;border-radius:8px;margin:8px 0">${escapeHtml(a.essayText||'لا توجد إجابة')}</p>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <label>الدرجة:</label>
+          <input type="number" class="score-input" min="0" max="${q.score}" value="${a.manualScore??''}" id="score_${a.questionId}">
+          <span class="muted">/ ${q.score}</span>
+        </div>
+        <div class="field" style="margin-top:8px">
+          <label>ملاحظات (اختياري)</label>
+          <input type="text" id="note_${a.questionId}" value="${escapeHtml(a.note||'')}">
+        </div>
+      </div>`;
+    }
+  }).join('')}
+  <div class="card">
+    <button class="btn btn-primary" onclick="saveGrading()">حفظ التصحيح</button>
+  </div>
+  `;
+}
+async function saveGrading(){
+  const r = _gradingResult, quiz = _gradingQuiz;
+  r.answers = r.answers.map(a=>{
+    if(a.type==='essay'){
+      const el = document.getElementById('score_'+a.questionId);
+      const noteEl = document.getElementById('note_'+a.questionId);
+      const q = quiz.questions.find(q=>q.id===a.questionId);
+      let val = el.value===''?null:parseFloat(el.value);
+      if(val!==null){ val = Math.max(0, Math.min(q.score, val)); }
+      return {...a, manualScore: val, note: noteEl.value};
+    }
+    return a;
+  });
+  recomputeTotals(r);
+  if(r.status==='corrected' && quiz.publishResultsImmediately){
+    r.published = true;
+  }
+  await dbSaveResult(r);
+  if(r.status==='corrected'){
+    tgNotify(`✅ تم تصحيح نتيجة\n\nالاختبار: ${r.quizTitle}\nالطالب: ${r.studentName}\nResult Code: ${r.resultCode}\nالدرجة: ${r.totalScore}/${r.maxScore}\nالحالة: تم التصحيح`);
+  }
+  toast('تم حفظ التصحيح','ok');
+  go('admin');
+}
+function deleteAttemptConfirm(){
+  openModal(`
+    <h2>حذف المحاولة</h2>
+    <p class="muted">سيتم حذف هذه المحاولة ونتيجتها نهائيًا. هل أنت متأكد؟</p>
+    <div class="btn-row">
+      <button class="btn btn-danger" onclick="closeModal();doDeleteAttempt()">حذف نهائي</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+async function doDeleteAttempt(){
+  await dbDeleteResult(_gradingResult.resultCode);
+  toast('تم حذف المحاولة','ok');
+  go('admin');
+}
+async function reopenGrading(){
+  _gradingResult.status='pending';
+  _gradingResult.published=false;
+  await dbSaveResult(_gradingResult);
+  toast('تم إعادة فتح المحاولة للتصحيح','ok');
+  drawGradeScreen();
+}
+window.saveGrading = saveGrading;
+window.deleteAttemptConfirm = deleteAttemptConfirm;
+window.doDeleteAttempt = doDeleteAttempt;
+window.reopenGrading = reopenGrading;
+
+/* ---- نشر جميع النتائج ---- */
+async function publishAllResults(){
+  openModal(`
+    <h2>نشر النتائج للطلاب</h2>
+    <p class="muted">سيتم نشر كل النتائج التي حالتها "تم التصحيح" دفعة واحدة. هل تريد المتابعة؟</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="closeModal();doPublishAll()">نشر</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+async function doPublishAll(){
+  const codes = Object.entries(STATE.manifest.results).filter(([c,r])=>r.status==='corrected' && !r.published).map(([c])=>c);
+  if(codes.length===0){ toast('لا توجد نتائج جديدة لنشرها','err'); return; }
+  for(const code of codes){
+    const r = await dbGetResult(code);
+    if(r){ r.published = true; await dbSaveResult(r); }
+  }
+  toast(`تم نشر ${codes.length} نتيجة`,'ok');
+  renderAdminTab();
+}
+window.publishAllResults = publishAllResults;
+window.doPublishAll = doPublishAll;
+
+/* ---- Backup / Restore ---- */
+async function exportBackup(){
+  toast('جاري تجهيز النسخة الاحتياطية...','');
+  const data = {version:DATA_VERSION, exportedAt: now(), manifest: STATE.manifest, quizzes:{}, results:{}};
+  for(const id of Object.keys(STATE.manifest.quizzes)){
+    data.quizzes[id] = await dbGetQuiz(id);
+  }
+  for(const code of Object.keys(STATE.manifest.results)){
+    data.results[code] = await dbGetResult(code);
+  }
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `quiz-master-backup-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('تم تصدير النسخة الاحتياطية','ok');
+}
+function importBackupPrompt(){
+  const fileEl = document.getElementById('importFile');
+  if(!fileEl.files.length){ toast('اختر ملفًا أولًا','err'); return; }
+  openModal(`
+    <h2>استيراد نسخة احتياطية</h2>
+    <p class="muted">سيتم إضافة/تحديث البيانات من الملف المختار. هل تريد المتابعة؟</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="closeModal();doImportBackup()">استيراد</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+async function doImportBackup(){
+  const fileEl = document.getElementById('importFile');
+  const file = fileEl.files[0];
+  const text = await file.text();
+  let data;
+  try{ data = JSON.parse(text); }catch(e){ toast('ملف غير صالح','err'); return; }
+  toast('جاري الاستيراد...','');
+  for(const [id,quiz] of Object.entries(data.quizzes||{})){
+    await dbSaveQuiz(quiz);
+  }
+  for(const [code,result] of Object.entries(data.results||{})){
+    await dbSaveResult(result);
+  }
+  toast('تم استيراد النسخة الاحتياطية','ok');
+  renderAdminTab();
+}
+window.exportBackup = exportBackup;
+window.importBackupPrompt = importBackupPrompt;
+window.doImportBackup = doImportBackup;
+
+/* =========================================================
+   9) بدء التشغيل + التعامل مع انقطاع الاتصال
+   ========================================================= */
+window.addEventListener('online', ()=>{ toast('عادت خدمة الإنترنت، جاري المزامنة...'); manualSync(); });
+window.addEventListener('offline', ()=>{ setSyncStatus('red','لا يوجد إنترنت'); toast('انقطع الاتصال بالإنترنت','err'); });
+window.addEventListener('error', (e)=>{ console.error(e); });
+
+initTheme();
+bootstrap();
+</script>
+</body>
+</html>
